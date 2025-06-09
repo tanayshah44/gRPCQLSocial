@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "50051:50051"
+    networks:
+      - app-net
+    volumes:
+      - ./user-service:/app
+    depends_on:
+      - mongo
+
+  post-service:
+    build: ./post-service
+    ports:
+      - "50052:50052"
+    networks:
+      - app-net
+    volumes:
+      - ./post-service:/app
+    depends_on:
+      - mongo
+
+  graphql-gateway:
+    build: ./graphql-gateway
+    ports:
+      - "4000:4000"
+    depends_on:
+      - user-service
+      - post-service
+    networks:
+      - app-net
+    volumes:
+      - ./graphql-gateway:/app
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    
+networks:
+  app-net:
+volumes:
+  mongo-data:
