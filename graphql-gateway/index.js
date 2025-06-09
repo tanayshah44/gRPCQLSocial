@@ -19,8 +19,8 @@ const postPackageDef = protoLoader.loadSync(postProtoPath);
 const postProto = grpc.loadPackageDefinition(postPackageDef).post;
 
 
-const userClient = new userProto.UserService('user-service:50051', grpc.credentials.createInsecure());
-const postClient = new postProto.PostService('post-service:50052', grpc.credentials.createInsecure());
+const userClient = new userProto.UserService('grpcqlsocial-production-041d.up.railway.app:80', grpc.credentials.createInsecure());
+const postClient = new postProto.PostService('grpcqlsocial-production.up.railway.app:80', grpc.credentials.createInsecure());
 
 function grpcCallWithRetry(clientFn, request) {
   return new Promise((resolve, reject) => {
