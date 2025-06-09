@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "@apollo/server": "^4.12.1",
     "@grpc/grpc-js": "^1.13.4",
