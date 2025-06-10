@@ -62,6 +62,10 @@ const typeDefs = `
     user(id: String!): User
     post(id: String!): Post
   }
+  type Mutation {
+    createUser(id: String!, name: String!): User
+    createPost(id: String!, title: String!, content: String!): Post
+  }
 `;
 
 const userPostMap = {
@@ -78,7 +82,20 @@ const resolvers = {
     post: async (_, args) =>
       grpcCallWithRetry(postClient.GetPost.bind(postClient), { id: args.id })
   },
+  Mutation: {
+    createUser: async (_, args) =>
+      grpcCallWithRetry(userClient.CreateUser.bind(userClient), {
+        id: args.id,
+        name: args.name
+      }),
 
+    createPost: async (_, args) =>
+      grpcCallWithRetry(postClient.CreatePost.bind(postClient), {
+        id: args.id,
+        title: args.title,
+        content: args.content
+      })
+  },
   User: {
     posts: async (parent) => {
       const postIds = userPostMap[parent.id] || [];
