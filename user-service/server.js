@@ -1,3 +1,4 @@
+require('dotenv').config();
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
@@ -12,24 +13,29 @@ const userPackage = grpcObject.user;
 // Create server and define methods
 const server = new grpc.Server();
 
+const User = require('./models/User');
+
+
 server.addService(userPackage.UserService.service, {
-  GetUser: (call, callback) => {
-    const userId = call.request.id;
-    console.log(`Received gRPC request for user ID: ${userId}`);
-    callback(null, { id: userId, name: 'Alice Tanay' });
+  // GetUser handler
+  GetUser: async (call, callback) => {
+    const user = await User.findOne({ id: call.request.id });
+    if (!user) return callback(null, {});
+    callback(null, { id: user.id, name: user.name });
   },
 
-  CreateUser: (call, callback) => {
+  // CreateUser handler
+  CreateUser: async (call, callback) => {
     const { id, name } = call.request;
-    console.log(`Received gRPC request to create user: ${id}, ${name}`);
-    // later plug this into MongoDB or some DB, but for now just echo it back
+    const newUser = new User({ id, name });
+    await newUser.save();
     callback(null, { id, name });
   }
 });
 
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://mongo:27017/myapp?retryWrites=true&w=majority', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
