@@ -4,10 +4,17 @@ package post;
 
 service PostService {
   rpc GetPost (PostRequest) returns (PostResponse);
+  rpc CreatePost (CreatePostRequest) returns (PostResponse);
 }
 
 message PostRequest {
   string id = 1;
+}
+
+message CreatePostRequest {
+  string id = 1;
+  string title = 2;
+  string content = 3;
 }
 
 message PostResponse {

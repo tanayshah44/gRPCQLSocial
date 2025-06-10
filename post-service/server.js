@@ -22,6 +22,11 @@ server.addService(postPackage.PostService.service, {
       content: 'This post was served via gRPC service!',
     });
   },
+  CreatePost: (call, callback) => {
+    const { id, title, content } = call.request;
+    console.log(`📨 Creating post: ${id}, ${title}, ${content}`);
+    callback(null, { id, title, content });
+  }
 });
 
 const mongoose = require('mongoose');
