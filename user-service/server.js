@@ -17,8 +17,16 @@ server.addService(userPackage.UserService.service, {
     const userId = call.request.id;
     console.log(`Received gRPC request for user ID: ${userId}`);
     callback(null, { id: userId, name: 'Alice Tanay' });
+  },
+
+  CreateUser: (call, callback) => {
+    const { id, name } = call.request;
+    console.log(`Received gRPC request to create user: ${id}, ${name}`);
+    // later plug this into MongoDB or some DB, but for now just echo it back
+    callback(null, { id, name });
   }
 });
+
 
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://mongo:27017/myapp?retryWrites=true&w=majority', {
@@ -32,7 +40,7 @@ server.bindAsync(
   '0.0.0.0:50051', // for user-service
   grpc.ServerCredentials.createInsecure(),
   () => {
-    console.log(`🚀 UserService running on port 50051`);
+    console.log(`UserService running on port 50051`);
     server.start();
   }
 );
