@@ -1,6 +1,8 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
+const mongoose = require('mongoose');
+
 
 // Load post.proto
 const packageDef = protoLoader.loadSync(
@@ -12,27 +14,27 @@ const postPackage = grpcObject.post;
 // Create server
 const server = new grpc.Server();
 
+const Post = require('./models/Post');
+
+
 server.addService(postPackage.PostService.service, {
-  GetPost: (call, callback) => {
-    const postId = call.request.id;
-    console.log(`📦 Received gRPC request for post ID: ${postId}`);
-    callback(null, {
-      id: postId,
-      title: 'Hello from gRPC',
-      content: 'This post was served via gRPC service!',
-    });
+  GetPost: async (call, callback) => {
+    const post = await Post.findOne({ id: call.request.id });
+    if (!post) return callback(null, {});
+    callback(null, { id: post.id, title: post.title, content: post.content });
   },
-  CreatePost: (call, callback) => {
+
+  CreatePost: async (call, callback) => {
     const { id, title, content } = call.request;
-    console.log(`📨 Creating post: ${id}, ${title}, ${content}`);
+    const newPost = new Post({ id, title, content });
+    await newPost.save();
     callback(null, { id, title, content });
   }
 });
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://mongo:27017/myapp?retryWrites=true&w=majority', {
+mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
 
 
@@ -41,7 +43,7 @@ server.bindAsync(
   '0.0.0.0:50052',
   grpc.ServerCredentials.createInsecure(),
   () => {
-    console.log(`🚀 PostService running on port 50052`);
+    console.log(`🚀 PostService running on port ${port}`);
     server.start();
   }
 );
